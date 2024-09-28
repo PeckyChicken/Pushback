@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://tfbt47cfr2jv"]
+
+[ext_resource type="Texture2D" uid="uid://byshtgrdhddfx" path="res://game_board.png" id="1_rmqte"]
+[ext_resource type="Script" path="res://GameBoard.gd" id="2_0xmeu"]
+[ext_resource type="PackedScene" uid="uid://yy3al4bwcbp5" path="res://piece.tscn" id="2_xvp3v"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="GameBoard" type="Sprite2D" parent="."]
+position = Vector2(-7.7486e-07, 0)
+scale = Vector2(1.65306, 1.65306)
+texture = ExtResource("1_rmqte")
+centered = false
+script = ExtResource("2_0xmeu")
+
+[node name="Piece" parent="GameBoard" instance=ExtResource("2_xvp3v")]
+position = Vector2(25, 25)
