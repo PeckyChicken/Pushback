@@ -2,16 +2,21 @@
 
 [ext_resource type="Texture2D" uid="uid://byshtgrdhddfx" path="res://game_board.png" id="1_rmqte"]
 [ext_resource type="Script" path="res://GameBoard.gd" id="2_0xmeu"]
-[ext_resource type="PackedScene" uid="uid://yy3al4bwcbp5" path="res://piece.tscn" id="2_xvp3v"]
+[ext_resource type="PackedScene" uid="uid://yy3al4bwcbp5" path="res://tile.tscn" id="2_xvp3v"]
 
 [node name="Node2D" type="Node2D"]
 
 [node name="GameBoard" type="Sprite2D" parent="."]
-position = Vector2(-7.7486e-07, 0)
+position = Vector2(2.38419e-07, 100)
 scale = Vector2(1.65306, 1.65306)
 texture = ExtResource("1_rmqte")
 centered = false
 script = ExtResource("2_0xmeu")
 
-[node name="Piece" parent="GameBoard" instance=ExtResource("2_xvp3v")]
+[node name="Tile" parent="GameBoard" instance=ExtResource("2_xvp3v")]
 position = Vector2(25, 25)
+
+[node name="tile" parent="." instance=ExtResource("2_xvp3v")]
+position = Vector2(283.562, 53.5625)
+scale = Vector2(2.69583, 2.69583)
+script = null
