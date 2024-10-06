@@ -1,13 +1,15 @@
 extends Sprite2D
+class_name Tile
 
 const KEY_DIRECTION = {KEY_A:"<",KEY_LEFT:"<",KEY_W:"^",KEY_UP:"^",KEY_D:">",KEY_RIGHT:">",KEY_S:"V",KEY_DOWN:"V"}
+@onready var GAME_BOARD = $".."
 var copy = false
 var x: int
 var y: int
 var hover = false
 var selected = false
 var moving = false
-var tween = null
+var tween: Tween
 var type = 0
 
 # Called when the node enters the scene tree for the first time.
@@ -16,8 +18,11 @@ func _ready():
 	Events.TileSelected.connect(deselect)
 	Events.ClearBoard.connect(func():if copy:queue_free())
 	Events.KeyPress.connect(key_press)
-	Events.Move.connect(func(a,b,c): push_pieces(a,b,c,true))
+	
+	if not copy: $"../../tile".modulate = Board.P0_color
+
 	deselect()
+	
 
 func delete_if_copy():
 	if copy:
@@ -47,9 +52,8 @@ func direction_to_linear(direction):
 		return
 	return [dx,dy]
 
-func move_piece(direction,distance):
-	if State.state == State.states.player_moving:
-		return false
+func move(direction,distance):
+	
 	State.state = State.states.player_moving
 	tween = get_tree().create_tween()
 	var dx
@@ -60,42 +64,66 @@ func move_piece(direction,distance):
 	dy = dy - int(dy > 0) + int(dy < 0)
 	dx *= distance
 	dy *= distance
-	print(dx,"x",dy)
 	tween.tween_property(self,"position",Vector2(position.x+dx,position.y+dy),0.25).set_trans(Tween.TRANS_CUBIC)
-
+	x += direction_to_linear(direction)[0] * distance
+	y += direction_to_linear(direction)[1] * distance
+	if y in [0,7]:
+		$TileFall.play()
+	else:
+		$TileMove.play()
 	await tween.finished
 	selected = false
 	State.state = State.states.player_waiting
 	Events.Setup.emit()
 	return true
+	
+func animate_invalid_move(tiles,direction):
+	var dcoords = direction_to_linear(direction)
+	var dx = dcoords[0] * Board.SQUARE_WIDTH/4
+	var dy = dcoords[1] * Board.SQUARE_HEIGHT/4
+	tween = get_tree().create_tween().set_parallel(true)
+	for tile in tiles:
+		tween.tween_property(tile,"position",Vector2(tile.position.x+dx,tile.position.y+dy),0.25).set_trans(Tween.TRANS_CUBIC)
+	await tween.finished
+	tween = get_tree().create_tween().set_parallel(true)
+	for tile in tiles:
+		tween.tween_property(tile,"position",Vector2(tile.position.x-dx,tile.position.y-dy),0.25).set_trans(Tween.TRANS_CUBIC)
+	await tween.finished
 
-func push_pieces(pos_x,pos_y,direction,pushing):
-	if [x,y] != [pos_x,pos_y]:
+func play_move(pos_x,pos_y,direction):
+	Board.game_moves.append(position)
+	var tiles: Array = GAME_BOARD.find_line(pos_x,pos_y,direction)
+	
+	if not GAME_BOARD.is_valid_move(tiles,direction):
+		if State.state == State.states.player_waiting:
+			State.state = State.states.player_moving
+			$TileInvalidMove.play()
+			await animate_invalid_move(tiles,direction)
+			State.state = State.states.player_waiting
 		return
-	var dx
-	var dy
-	if State.state == State.states.player_moving and not pushing:
-		return
-	move_piece(direction,1)
 	
-	dx = direction_to_linear(direction)[0]
-	dy = direction_to_linear(direction)[1]
+	tiles.reverse()
+	GAME_BOARD.push_tiles(tiles,direction,1)
 	
-	Board.set_square(x,y,0)
-	x += dx
-	y += dy
-	if Board.get_square(x,y) in [3,4,5]: #If there is already a tile at the new x and y
-		Events.Move.emit(pos_x+dx,pos_y+dy,direction)
+	Board.game_moves.append([pos_x,pos_y,direction])
 	
-	Board.set_square(x,y,type)
-
+	State.turn += 1
+	State.turn %= 2
+	if State.turn == 0:
+		$"../../tile".modulate = Board.P0_color
+	elif State.turn == 1:
+		$"../../tile".modulate = Board.P1_color
+	
 func key_press(key):
 	if selected:
 		if key in KEY_DIRECTION:
-			$"res://GameBoard.gd".push_pieces(x,y,KEY_DIRECTION[key],false)
+			play_move(x,y,KEY_DIRECTION[key])
 
 func _on_mouse_clicked(button):
 	if hover and button == MOUSE_BUTTON_LEFT:
+		if type == 0:
+			print("Square X: %s Y: %s clicked." % [x,y])
+			return
 		var deselect_tile = selected
 		Events.TileSelected.emit()
 		selected = not deselect_tile
@@ -110,7 +138,6 @@ func set_color(color):
 
 func place(pos_x,pos_y):
 	position = Vector2((pos_x+0.5)*(Board.SQUARE_WIDTH-1),(pos_y+0.5)*(Board.SQUARE_HEIGHT-1))
-	#print("Converted grid coordinates X: %d and Y: %d into value coordinates of X: %d and Y: %d" % [x,y,(x+0.5)*Board.SQUARE_WIDTH,(y+0.5)*Board.SQUARE_HEIGHT])
 
 func _on_mouse_entered():
 	
