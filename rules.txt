@@ -1,0 +1,10 @@
+- On your turn, you may move any piece of your color 1 square in any of the 4 cardinal directions.
+- If you move a piece into a line of your own pieces, all the pieces get pushed along 1 square.
+- If you move a line into a line of your opponents pieces, you will push your opponent's line if you are pushing with an equal or longer line, otherwise the move cannot be played.
+- If an opponent pushed your piece, you cannot push their piece with your pushed piece on the next move.
+- Neither of the white pieces can be moved by either player, and may only be pushed. These pieces also add to your opponent's line when pushing.
+- You win the game by getting 6 pieces, whether red or blue, into your opponent's goal, whether you push them in or move them in. White pieces cannot enter the goal under any circumstances.
+- If you push an opponent's piece off the side of the board, it goes next to their goal, and they can use a turn to place it back on their first rank at any point.
+- The areas to the side of the goal are walls and cannot be moved into.
+- If an enemy piece is in the middle of two lines of a player's own pieces, the line cannot be pushed.
+- If either side has no legal move on their turn, the game is drawn by stalemate
