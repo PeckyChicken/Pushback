@@ -1,12 +1,12 @@
 extends Node2D
 class_name EventClass
-
 signal Setup
 signal SquareClicked(x,y)
 signal MouseClick(button)
 signal MouseRelease(button)
 signal KeyPress(key)
 signal Move(x,y,direction)
+signal EmptySquareClick(x,y)
 
 signal TileSelected
 signal ClearBoard
