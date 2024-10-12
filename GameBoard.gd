@@ -41,8 +41,6 @@ func setup_board_tiles():
 			add_child(new_tile)
 	$Tile.hide()
 
-func setup_dead_tiles()
-
 func is_valid_move(tiles: Array,direction):
 	#Assuming first item in array is the tile pushing.
 	#See "rules.txt" for an explaination of the rules in English.
