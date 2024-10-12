@@ -17,6 +17,7 @@ const BLOCK = 2
 const P0_TILE = 3
 const P1_TILE = 4
 const NEUTRAL_TILE = 5
+const DEAD_TILE_MARGIN = 10
 
 const WIDTH = 7
 const HEIGHT = 8
@@ -27,9 +28,14 @@ const P1_color = "#FFFF00"
 const Neutral_color = "#FFFFFF"
 const STATIC_TILES = [0,1,2]
 
+var p1score = []
+var p2score = []
 var tiles = []
 var board = START.duplicate()
 
+var selected_x = 0
+var selected_y = 0
+var selected = false
 var valid_move_grid = []
 var game_moves = []
 var game_positions = []
