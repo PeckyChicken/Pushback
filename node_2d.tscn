@@ -7,7 +7,7 @@
 [node name="Node2D" type="Node2D"]
 
 [node name="GameBoard" type="Sprite2D" parent="."]
-position = Vector2(2.38419e-07, 100)
+position = Vector2(9.53674e-07, 1.90735e-06)
 scale = Vector2(1.65306, 1.65306)
 texture = ExtResource("1_rmqte")
 centered = false
@@ -16,12 +16,14 @@ script = ExtResource("2_0xmeu")
 [node name="Tile" parent="GameBoard" instance=ExtResource("2_xvp3v")]
 position = Vector2(25, 25)
 
-[node name="turn_indicator" parent="." instance=ExtResource("2_xvp3v")]
-position = Vector2(283.562, 53.5625)
-scale = Vector2(2.69583, 2.69583)
+[node name="dead_tile_display" parent="GameBoard" instance=ExtResource("2_xvp3v")]
+visible = false
+position = Vector2(74.4075, 26.6173)
+scale = Vector2(1.05722, 1.05722)
 script = null
 
-[node name="dead_tile_display" parent="." instance=ExtResource("2_xvp3v")]
-position = Vector2(117, 141)
-scale = Vector2(1.99062, 1.99062)
+[node name="turn_indicator" parent="." instance=ExtResource("2_xvp3v")]
+visible = false
+position = Vector2(283.562, 53.5625)
+scale = Vector2(2.69583, 2.69583)
 script = null
