@@ -19,7 +19,7 @@ func _ready():
 	Events.ClearBoard.connect(func():if copy:queue_free())
 	Events.KeyPress.connect(key_press)
 	
-	if not copy: $"../../tile".modulate = Board.P0_color
+	if not copy: $"../../turn_indicator".modulate = Board.P0_color
 
 	deselect()
 	
@@ -52,6 +52,21 @@ func direction_to_linear(direction):
 		return
 	return [dx,dy]
 
+func linear_to_direction(dx,dy):
+	var direction
+	if dx < 0 and dy == 0:
+		direction = "<"
+	elif dx > 0 and dy == 0:
+		direction = ">"
+	elif dx == 0 and dy < 0:
+		direction = "^"
+	elif dx == 0 and dy > 0:
+		direction = "V"
+	else:
+		print("linear_to_direction(): Invalid linear, exactly 1 of %s and %s must be 0" % [dx,dy])
+		return
+	return direction
+
 func move(direction,distance):
 	
 	State.state = State.states.player_moving
@@ -67,12 +82,18 @@ func move(direction,distance):
 	tween.tween_property(self,"position",Vector2(position.x+dx,position.y+dy),0.25).set_trans(Tween.TRANS_CUBIC)
 	x += direction_to_linear(direction)[0] * distance
 	y += direction_to_linear(direction)[1] * distance
-	if y in [0,7]:
+	if Board.get_square_value(x,y) == Board.END:
 		$TileFall.play()
+		if y == 0:
+			Board.p2score.append(type)
+		if y == 7:
+			Board.p1score.append(type)
+		Board.set_square_value(x,y,Board.END)
 	else:
 		$TileMove.play()
 	await tween.finished
 	selected = false
+	Board.selected = false
 	State.state = State.states.player_waiting
 	Events.Setup.emit()
 	return true
@@ -110,9 +131,9 @@ func play_move(pos_x,pos_y,direction):
 	State.turn += 1
 	State.turn %= 2
 	if State.turn == 0:
-		$"../../tile".modulate = Board.P0_color
+		$"../../turn_indicator".modulate = Board.P0_color
 	elif State.turn == 1:
-		$"../../tile".modulate = Board.P1_color
+		$"../../turn_indicator".modulate = Board.P1_color
 	
 func key_press(key):
 	if selected:
@@ -122,15 +143,19 @@ func key_press(key):
 func _on_mouse_clicked(button):
 	if hover and button == MOUSE_BUTTON_LEFT:
 		if type == 0:
-			print("Square X: %s Y: %s clicked." % [x,y])
+			Events.EmptySquareClick.emit(x,y)
 			return
 		var deselect_tile = selected
 		Events.TileSelected.emit()
 		selected = not deselect_tile
 		$selection.visible = selected
+		Board.selected = selected
+		Board.selected_x = x
+		Board.selected_y = y
 
 func deselect():
 	selected = false
+	Board.selected = false
 	$selection.visible = false
 
 func set_color(color):
@@ -140,7 +165,6 @@ func place(pos_x,pos_y):
 	position = Vector2((pos_x+0.5)*(Board.SQUARE_WIDTH-1),(pos_y+0.5)*(Board.SQUARE_HEIGHT-1))
 
 func _on_mouse_entered():
-	
 	hover = true
 
 func _on_mouse_exited():
