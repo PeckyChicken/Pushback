@@ -67,6 +67,27 @@ func linear_to_direction(dx,dy):
 		return
 	return direction
 
+func position_dead_tile():
+	tween = get_tree().create_tween()
+	var score
+	if y == Board.HEIGHT-1:
+		score = Board.p1score
+	if y == 0:
+		score = Board.p2score
+	var move_x = Board.SQUARE_WIDTH + len(score)*Board.DEAD_TILE_MARGIN
+	
+	tween.tween_property(self,"position",Vector2(move_x,position.y),0.25).set_trans(Tween.TRANS_CUBIC)
+
+func create_dead_tile(pos_y,index,color):
+	pos_y *= Board.SQUARE_HEIGHT-1
+	pos_y += Board.SQUARE_HEIGHT/2
+	var pos_x = Board.SQUARE_WIDTH + index*Board.DEAD_TILE_MARGIN
+	var dead_tile = $"../dead_tile_display".duplicate()
+	dead_tile.position = Vector2(pos_x,pos_y)
+	dead_tile.modulate = color
+	dead_tile.visible = true
+	$"..".add_child(dead_tile)
+
 func move(direction,distance):
 	
 	State.state = State.states.player_moving
@@ -82,16 +103,23 @@ func move(direction,distance):
 	tween.tween_property(self,"position",Vector2(position.x+dx,position.y+dy),0.25).set_trans(Tween.TRANS_CUBIC)
 	x += direction_to_linear(direction)[0] * distance
 	y += direction_to_linear(direction)[1] * distance
+
+	await tween.finished
 	if Board.get_square_value(x,y) == Board.END:
 		$TileFall.play()
+		var score
 		if y == 0:
 			Board.p2score.append(type)
-		if y == 7:
+			score = Board.p2score
+		if y == Board.HEIGHT-1:
 			Board.p1score.append(type)
-		Board.set_square_value(x,y,Board.END)
+			score = Board.p1score
+		position_dead_tile()
+		await tween.finished
+		print(score)
+		create_dead_tile(y,len(score),modulate)
 	else:
 		$TileMove.play()
-	await tween.finished
 	selected = false
 	Board.selected = false
 	State.state = State.states.player_waiting
