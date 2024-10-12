@@ -16,7 +16,12 @@ script = ExtResource("2_0xmeu")
 [node name="Tile" parent="GameBoard" instance=ExtResource("2_xvp3v")]
 position = Vector2(25, 25)
 
-[node name="tile" parent="." instance=ExtResource("2_xvp3v")]
+[node name="turn_indicator" parent="." instance=ExtResource("2_xvp3v")]
 position = Vector2(283.562, 53.5625)
 scale = Vector2(2.69583, 2.69583)
+script = null
+
+[node name="dead_tile_display" parent="." instance=ExtResource("2_xvp3v")]
+position = Vector2(117, 141)
+scale = Vector2(1.99062, 1.99062)
 script = null
