@@ -17,7 +17,7 @@ const BLOCK = 2
 const P0_TILE = 3
 const P1_TILE = 4
 const NEUTRAL_TILE = 5
-const DEAD_TILE_MARGIN = 10
+const DEAD_TILE_MARGIN = 15
 
 const WIDTH = 7
 const HEIGHT = 8
