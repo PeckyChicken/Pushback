@@ -6,9 +6,13 @@ var tile_texture = load("res://Tiles/white.png")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	Events.Setup.connect(setup)
+	Events.EmptySquareClick.connect(square_click)
 	setup()
 
 func setup():
+	setup_board_tiles()
+
+func setup_board_tiles():
 	Events.ClearBoard.emit()
 	Board.tiles.clear()
 	for y in range(Board.HEIGHT):
@@ -17,7 +21,7 @@ func setup():
 			if square_type in [1,2]: #If square is a board square.
 				Board.tiles.append(0)
 				continue
-			if square_type not in [0,3,4,5]: #It is an error call which shouldn't have happened.
+			if square_type not in [0,3,4,5]:
 				print("ERROR: square_type was value %s, which is an unrecognised value." % [square_type])
 				Board.tiles.append(0)
 				continue
@@ -37,6 +41,8 @@ func setup():
 			add_child(new_tile)
 	$Tile.hide()
 
+func setup_dead_tiles()
+
 func is_valid_move(tiles: Array,direction):
 	#Assuming first item in array is the tile pushing.
 	#See "rules.txt" for an explaination of the rules in English.
@@ -44,9 +50,15 @@ func is_valid_move(tiles: Array,direction):
 	var dcoords = $Tile.direction_to_linear(direction)
 	var dx = dcoords[0]
 	var dy = dcoords[1]
+	if len(tiles) == 0:
+		return false
 	var tail_tile = tiles[0]
 	var head_tile = tiles[-1]
+	
 	var end_square = Board.get_square_value(head_tile.x+dx,head_tile.y+dy)
+	
+	if State.state == State.states.player_moving:
+		return false
 	
 	if tail_tile.type - 3 != State.turn: #The player can only move their own tiles
 		return false
@@ -90,7 +102,18 @@ func push_tiles(tiles: Array,direction,distance):
 	for tile in tiles:
 		Board.set_square_value(tile.x,tile.y,0)
 		tile.move(direction,distance)
-		Board.set_square_value(tile.x,tile.y,tile.type)
+		if Board.get_square_value(tile.x,tile.y) != Board.END:
+			Board.set_square_value(tile.x,tile.y,tile.type)
+
+func square_click(pos_x,pos_y):
+	if not Board.selected:
+		return
+	var dx = pos_x - Board.selected_x
+	var dy = pos_y - Board.selected_y
+	if abs(dx)+abs(dy) > 1:
+		return
+	var direction = $Tile.linear_to_direction(dx,dy)
+	Board.get_square_object(Board.selected_x,Board.selected_y).play_move(Board.selected_x,Board.selected_y,direction)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
